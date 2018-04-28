@@ -6,10 +6,13 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstdio>
-#include <string>
+#include <cstring>
+#include <ctime>
 #include <gmp.h>
+#include "prime_gen.h"
 
 void menu_art();
+int load_data();
 
 int main()
 {
@@ -21,7 +24,15 @@ int main()
   int cond;
 
   //GMP Variables
-  mpz_t p1, p2;
+  mpz_t p1, p2, totien;
+  //Variables Initialize
+  mpz_init(p1);
+  mpz_init(p2);
+  mpz_init(totien);
+  mpz_set_ui(totien,0);
+  mpz_set_ui(p1,0);
+  mpz_set_ui(p2,0);
+
   menu_art();
   char hex[]= "0abcdefghijklmnopqrstuvwxyz";
 
@@ -38,11 +49,6 @@ int main()
       scanf("%1023s", prime1);
       std::cout << "Prime N2: " << '\n';
       scanf("%1023s", prime2);
-      //Numbers Initialize
-      mpz_init(p1);
-      mpz_init(p2);
-      mpz_set_ui(p1,0);
-      mpz_set_ui(p2,0);
       //input assigment for p1,p2
       mpz_set_str(p1,prime1,10);
       mpz_set_str(p2,prime2,10);
@@ -59,14 +65,29 @@ int main()
         std::cout << "Error: Please enter a valid prime number" << '\n';
       }
     }
-    std::cout << "Generating Key......." << '\n';
-    break;
+    //Resto 1 para calcular Totien
+    mpz_sub_ui(p1,p1,1);
+    mpz_sub_ui(p2,p2,1);
+    mpz_mul(totien,p1,p2);
+    //Multiplicacion Totien
 
+    std::cout << "Totien: " << totien << '\n';
+    std::cout << "Generating Key......." << '\n';
+    mpz_clear(p1);
+    mpz_clear(p2);
+    break;
     case 2:
-    system("clear");
+    prime_gen(p1,p2);
+    std::cout << "Prime 1: " << p1<<'\n';
+    std::cout << "Prime 2: " << p2<<'\n';
     break;
 
     case 3:
+    system("clear");
+    load_data();
+    break;
+
+    case 4:
     system("clear");
     break;
   }
@@ -129,7 +150,30 @@ int main()
   */
 }
 
-void menu_art(){
+int load_data()
+{
+  char plaintext[1200];
+  char strconfig[120];
+  FILE *msPtr;
+  if ((msPtr = fopen("message.txt","r"))==NULL)
+  {
+    std::cout << "File not found" << '\n';
+  }
+  else
+  {
+    strcpy(plaintext," ");
+    fseek(msPtr,0,SEEK_SET);
+    while (fscanf(msPtr, "%s",strconfig) !=EOF)
+    {
+       strcat(strcat(plaintext, " "),strconfig);
+    }
+  }
+  std::cout << "Message: " << plaintext << '\n';
+  fclose(msPtr);
+}
+
+void menu_art()
+{
   printf("                    888        Y88b   d88P\n");
   printf("                    888         Y88b d88P  \n");
   printf("                    888          Y88o88P  \n");
@@ -143,7 +187,8 @@ void menu_art(){
   printf("\n\n-----------------------------------------------\n");
   printf("Andrés Orozco\nKevin Cardenas \nHector Mejia\n\n");
   std::cout << "Main Menu" << '\n';
-  std::cout << "1) Generate Keys" << '\n';
-  std::cout << "2) Encrypt Data" << '\n';
-  std::cout << "3) Decrypt Data" << '\n';
+  std::cout << "1) Manually generation Keys" << '\n';
+  std::cout << "2) Auto generation Keys" << '\n';
+  std::cout << "3) Encrypt Data" << '\n';
+  std::cout << "4) Decrypt Data" << '\n';
 }
