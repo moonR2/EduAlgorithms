@@ -24,14 +24,9 @@ int main()
   int cond;
 
   //GMP Variables
-  mpz_t p1, p2, totien;
+  mpz_t p1, p2,n, totien, coprime;
   //Variables Initialize
-  mpz_init(p1);
-  mpz_init(p2);
-  mpz_init(totien);
-  mpz_set_ui(totien,0);
-  mpz_set_ui(p1,0);
-  mpz_set_ui(p2,0);
+  mpz_inits(p1,p2,n,totien,coprime,NULL);
 
   menu_art();
   char hex[]= "0abcdefghijklmnopqrstuvwxyz";
@@ -66,20 +61,30 @@ int main()
       }
     }
     //Resto 1 para calcular Totien
+    mpz_mul(n,p1,p2);
     mpz_sub_ui(p1,p1,1);
     mpz_sub_ui(p2,p2,1);
     mpz_mul(totien,p1,p2);
     //Multiplicacion Totien
-
-    std::cout << "Totien: " << totien << '\n';
     std::cout << "Generating Key......." << '\n';
+    std::cout << "n: " << n << '\n';
+    std::cout << "Totien: " << totien << '\n';
+
     mpz_clear(p1);
     mpz_clear(p2);
     break;
     case 2:
-    prime_gen(p1,p2);
-    std::cout << "Prime 1: " << p1<<'\n';
-    std::cout << "Prime 2: " << p2<<'\n';
+    prime_gen(p1,p2,99999,999999);
+    mpz_mul(n,p1,p2);
+    std::cout << "Prime 1: " << p1 <<'\n';
+    std::cout << "Prime 2: " << p2 <<'\n';
+    std::cout << "n: " << n << '\n';
+    mpz_sub_ui(p1,p1,1);
+    mpz_sub_ui(p2,p2,1);
+    mpz_mul(totien,p1,p2);
+    std::cout << "Totien: " << totien << '\n';
+    coprime_gen(totien,coprime);
+    std::cout << "Coprime: " << coprime << '\n';
     break;
 
     case 3:
