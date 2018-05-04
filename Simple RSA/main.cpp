@@ -11,8 +11,12 @@
 #include <gmp.h>
 #include "prime_gen.h"
 
+char plaintext[1200];
+mpz_t charbase;
+void texttonum();
 void menu_art();
-int load_data();
+void load_data();
+
 
 int main()
 {
@@ -29,7 +33,7 @@ int main()
   mpz_inits(p1,p2,n,totien,coprime,NULL);
 
   menu_art();
-  char hex[]= "0abcdefghijklmnopqrstuvwxyz";
+
 
   std::cin >> menu_option;
   switch (menu_option) {
@@ -65,16 +69,17 @@ int main()
     mpz_sub_ui(p1,p1,1);
     mpz_sub_ui(p2,p2,1);
     mpz_mul(totien,p1,p2);
+    mpz_set_ui(coprime,11);
     //Multiplicacion Totien
     std::cout << "Generating Key......." << '\n';
     std::cout << "n: " << n << '\n';
     std::cout << "Totien: " << totien << '\n';
-
+    std::cout << "coprime: " << coprime <<'\n';
     mpz_clear(p1);
     mpz_clear(p2);
     break;
     case 2:
-    prime_gen(p1,p2,99999,999999);
+    prime_gen(p1,p2,9999,99999);
     mpz_mul(n,p1,p2);
     std::cout << "Prime 1: " << p1 <<'\n';
     std::cout << "Prime 2: " << p2 <<'\n';
@@ -85,11 +90,21 @@ int main()
     std::cout << "Totien: " << totien << '\n';
     coprime_gen(totien,coprime);
     std::cout << "Coprime: " << coprime << '\n';
-    break;
+    mpz_t g, s, t;
+    mpz_inits(g,s,t,NULL);
+    mpz_gcdext (g , s, t, totien, coprime);
+    mpz_abs(t,t);
+    std::cout << "t: " << t << '\n';
 
     case 3:
+
+    mpz_t encrypted_text;
+    mpz_init(encrypted_text);
     system("clear");
     load_data();
+    texttonum();
+    mpz_powm(encrypted_text,charbase,coprime,n);
+    std::cout << "Encrypted: " << encrypted_text << '\n';
     break;
 
     case 4:
@@ -155,9 +170,9 @@ int main()
   */
 }
 
-int load_data()
+void load_data()
 {
-  char plaintext[1200];
+
   char strconfig[120];
   FILE *msPtr;
   if ((msPtr = fopen("message.txt","r"))==NULL)
@@ -175,7 +190,9 @@ int load_data()
   }
   std::cout << "Message: " << plaintext << '\n';
   fclose(msPtr);
+
 }
+
 
 void menu_art()
 {
@@ -196,4 +213,13 @@ void menu_art()
   std::cout << "2) Auto generation Keys" << '\n';
   std::cout << "3) Encrypt Data" << '\n';
   std::cout << "4) Decrypt Data" << '\n';
+}
+
+void texttonum()
+{
+
+    mpz_init(charbase);
+    mpz_set_str(charbase,plaintext,62);
+    std::cout << "Charbase: " << charbase <<'\n';
+
 }

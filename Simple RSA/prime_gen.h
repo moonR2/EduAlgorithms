@@ -22,7 +22,7 @@ void coprime_gen(mpz_t number, mpz_t coprime)
   mpz_t prime2,resul;
   mpz_inits(coprime,prime2, resul, NULL);
   do {
-    prime_gen(coprime,prime2,0,999999);
+    prime_gen(coprime,prime2,0,99999);
     mpz_gcd(resul,number,coprime);
     handle = mpz_get_ui(resul);
   } while (handle != 1);
