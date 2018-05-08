@@ -12,6 +12,7 @@
 #include "prime_gen.h"
 
 char plaintext[1200];
+char plaintext_dec[1200];
 mpz_t charbase;
 void texttonum();
 void menu_art();
@@ -21,153 +22,131 @@ void load_data();
 int main()
 {
   //Variables
-  int menu_option;
+  int menu_option, main_menu;
   char prime1[1024];// Prime N1 (1024 bytes supported)
   char prime2[1024];// Prime N2
+  char coprime_p[1024];
   int flag1, flag2;
   int cond;
 
   //GMP Variables
-  mpz_t p1, p2,n, totien, coprime;
+  mpz_t p1, p2,n, totien, coprime, inverse,encrypted_text;
   //Variables Initialize
-  mpz_inits(p1,p2,n,totien,coprime,NULL);
+  mpz_inits(p1,p2,n,totien,coprime,inverse,encrypted_text,NULL);
 
-  menu_art();
+  do {
+    menu_art();
+    std::cin >> menu_option;
 
+    switch (menu_option) {
+      case 1:
 
-  std::cin >> menu_option;
-  switch (menu_option) {
-    case 1:
-    system("clear");
-    cond = 0;
-    while (cond==0)
-    {
-
-      std::cout << "Choose two primes to generates key" << '\n';
-      std::cout << "Prime N1: " << '\n';
-      scanf("%1023s", prime1);
-      std::cout << "Prime N2: " << '\n';
-      scanf("%1023s", prime2);
-      //input assigment for p1,p2
-      mpz_set_str(p1,prime1,10);
-      mpz_set_str(p2,prime2,10);
-      //The function return 2 if p is prime
-      flag1 = mpz_probab_prime_p(p1,15);
-      flag2 = mpz_probab_prime_p(p2,15);
-      if(flag1==2 && flag2==2)
+      system("clear");
       {
-        std::cout << "Primes Numbers Checked" << '\n';
-        cond = 1;
+        main_menu=0;
+        std::cout << "Choose two primes to generates key" << '\n';
+        std::cout << "Prime N1: " << '\n';
+        scanf("%1023s", prime1);
+        std::cout << "Prime N2: " << '\n';
+        scanf("%1023s", prime2);
+        std::cout << "Coprime: " << '\n';
+        scanf("%1023s", coprime_p);
+        //input assigment for p1,p2
+        mpz_set_str(p1,prime1,10);
+        mpz_set_str(p2,prime2,10);
+        mpz_set_str(coprime,coprime_p,10);
+        //The function return 2 if p is prime
+        flag1 = mpz_probab_prime_p(p1,15);
+        flag2 = mpz_probab_prime_p(p2,15);
+
+        if(flag1==2 && flag2==2)
+        {
+          system("clear");
+          std::cout << "----------------------------------------------------------" << '\n';
+          std::cout << "Primes Numbers Checked" << '\n';
+          mpz_mul(n,p1,p2);
+          std::cout << "Prime 1: " << p1 <<'\n';
+          std::cout << "Prime 2: " << p2 <<'\n';
+          std::cout << "n: " << n << '\n';
+          mpz_sub_ui(p1,p1,1);
+          mpz_sub_ui(p2,p2,1);
+          mpz_mul(totien,p1,p2);
+          mpz_invert(inverse,coprime,totien);
+          std::cout << "Totien: " << totien << '\n';
+          std::cout << "Coprime(k): " << coprime << '\n';
+          std::cout << "Inverse(j): " << inverse << '\n';
+          std::cout << "----------------------------------------------------------" << '\n';
+          std::cout << "Public Key(k,n): ("<< coprime << "," <<n <<")" << '\n';
+          std::cout << "Private Key(j,n): ("<< inverse << "," <<n <<")" << '\n';
+          cond = 1;
+        }
+        else
+        {
+          std::cout << "Error: Please enter a valid prime number" << '\n';
+        }
       }
-      else
-      {
-        std::cout << "Error: Please enter a valid prime number" << '\n';
-      }
+      mpz_clear(p1);
+      mpz_clear(p2);
+      std::cout << "Press 4 to display Main Menu: " << '\n';
+      std::cin >> main_menu;
+      break;
+
+      case 2:
+      system("clear");
+      main_menu=0;
+      prime_gen(p1,p2,999999999999999999,18446744073709551615);
+      mpz_mul(n,p1,p2);
+      std::cout << "----------------------------------------------------------" << '\n';
+      std::cout << "Prime 1: " << p1 <<'\n';
+      std::cout << "Prime 2: " << p2 <<'\n';
+      std::cout << "n: " << n << '\n';
+      mpz_sub_ui(p1,p1,1);
+      mpz_sub_ui(p2,p2,1);
+      mpz_mul(totien,p1,p2);
+      coprime_gen(totien,coprime);
+      std::cout << "Totien: " << totien << '\n';
+      std::cout << "Coprime(k): " << coprime << '\n';
+      mpz_invert(inverse,coprime,totien);
+      std::cout << "Inverse(j): " << inverse << '\n';
+      std::cout << "----------------------------------------------------------" << '\n';
+      std::cout << "Public Key(k,n): ("<< coprime << "," <<n <<")" << '\n';
+      std::cout << "Private Key(j,n): ("<< inverse << "," <<n <<")" << '\n';
+      std::cout << "\nPress 4 to display Main Menu: " << '\n';
+      std::cin >> main_menu;
+      break;
+
+      case 3:
+      main_menu=0;
+      system("clear");
+      load_data();
+      std::cout << "----------------------------------------------------------" << '\n';
+      texttonum();
+      mpz_powm(encrypted_text,charbase,coprime,n);
+      std::cout << "Encrypted: " << encrypted_text << '\n';
+      std::cout << "----------------------------------------------------------" << '\n';
+      std::cout << "Press 4 to display Main Menu: " << '\n';
+      std::cin >> main_menu;
+      break;
+
+      case 4:
+      main_menu=0;
+      system("clear");
+      mpz_t decrypted_text;
+      mpz_init(decrypted_text);
+      mpz_powm(decrypted_text,encrypted_text,inverse,n);
+      std::cout << "----------------------------------------------------------" << '\n';
+      texttonum();
+      std::cout << "Encrypted: " << encrypted_text <<'\n';
+      std::cout << "Decrypted: " << decrypted_text << '\n';
+      mpz_get_str(plaintext_dec,62,decrypted_text);
+      std::cout << "Decrypted message: " << plaintext_dec << '\n';
+      std::cout << "----------------------------------------------------------" << '\n';
+      std::cout << "Press 4 to display Main Menu: " << '\n';
+      std::cin >> main_menu;
+      break;
     }
-    //Resto 1 para calcular Totien
-    mpz_mul(n,p1,p2);
-    mpz_sub_ui(p1,p1,1);
-    mpz_sub_ui(p2,p2,1);
-    mpz_mul(totien,p1,p2);
-    mpz_set_ui(coprime,11);
-    //Multiplicacion Totien
-    std::cout << "Generating Key......." << '\n';
-    std::cout << "n: " << n << '\n';
-    std::cout << "Totien: " << totien << '\n';
-    std::cout << "coprime: " << coprime <<'\n';
-    mpz_clear(p1);
-    mpz_clear(p2);
-    break;
-    case 2:
-    prime_gen(p1,p2,9999,99999);
-    mpz_mul(n,p1,p2);
-    std::cout << "Prime 1: " << p1 <<'\n';
-    std::cout << "Prime 2: " << p2 <<'\n';
-    std::cout << "n: " << n << '\n';
-    mpz_sub_ui(p1,p1,1);
-    mpz_sub_ui(p2,p2,1);
-    mpz_mul(totien,p1,p2);
-    std::cout << "Totien: " << totien << '\n';
-    coprime_gen(totien,coprime);
-    std::cout << "Coprime: " << coprime << '\n';
-    mpz_t g, s, t;
-    mpz_inits(g,s,t,NULL);
-    mpz_gcdext (g , s, t, totien, coprime);
-    mpz_abs(t,t);
-    std::cout << "t: " << t << '\n';
+  }while(main_menu==4);
 
-    case 3:
-
-    mpz_t encrypted_text;
-    mpz_init(encrypted_text);
-    system("clear");
-    load_data();
-    texttonum();
-    mpz_powm(encrypted_text,charbase,coprime,n);
-    std::cout << "Encrypted: " << encrypted_text << '\n';
-    break;
-
-    case 4:
-    system("clear");
-    break;
-  }
-
-
-  /*
-  //-----------------------------------------  Bob Keys�s generation Zone
-  cout << "Bob generates his public and private keys ----" << endl;
-
-  int p=5, q=13;   //  Bob chosen primes
-
-  int n;
-  n=p*q;    //   product of primes TOTIENT = 48
-  int k=5;  //   privada
-  int j=29;  //   publica
-
-  // public key of Bob is  (48,29)
-  unsigned long int E;
-
-  cout << "the product p*q=n is "<< n << endl<<endl;
-  cout << "the chosen prime number k is "<< k << endl<<endl;
-  cout << "the private key of Bob is "<< j << endl<<endl;
-
-  cout << "the public key of bob is (" << n << "," << k << ")" << endl<<endl;
-  cout << "---- Bob finish his keys generation----" << endl<<endl;
-
-  //-----------------------------------------  Alice Encryption Zone
-  entry:
-
-  int P;  //  data to be broadcast
-
-  cout << "Enter the data to be send by Alice: ";
-
-  cin >> P ;
-  system("cls");
-  cout << endl;
-  cout << "The data Alice want to send is ---" << P << endl;
-  cout << "Encryption by Alice begins ----" << endl;
-
-  E=pow(P,j);    //     P is data , k is public key of Bob
-  cout << " E=P^k   is "<< E <<endl;
-  E = E %n; //  mod(n),  n is public key of Bob
-  cout << "E mod(n) is "<< E << endl;
-  cout << "the encrypted message Alice sends is "<< E << endl<<endl;
-
-  //----------------------------------------  bob decryption Zone
-
-  cout << "Decriptopn by Bob begins; E^j = P(mod n) " << endl;
-
-  E = pow(E,k);
-  E = E %n;
-  cout << " the decrypted message is "<< E << endl<<endl;
-
-
-  cout << "--------------------" << endl;
-  //gets(dummy);
-  goto entry;
-
-  return 0;
-  */
 }
 
 void load_data()
@@ -185,7 +164,7 @@ void load_data()
     fseek(msPtr,0,SEEK_SET);
     while (fscanf(msPtr, "%s",strconfig) !=EOF)
     {
-       strcat(strcat(plaintext, " "),strconfig);
+      strcat(strcat(plaintext, " "),strconfig);
     }
   }
   std::cout << "Message: " << plaintext << '\n';
@@ -196,6 +175,7 @@ void load_data()
 
 void menu_art()
 {
+  system("clear");
   printf("                    888        Y88b   d88P\n");
   printf("                    888         Y88b d88P  \n");
   printf("                    888          Y88o88P  \n");
@@ -207,7 +187,8 @@ void menu_art()
   printf("¨Y8888P ¨Y88P¨  ¨Y88888 ¨Y8888d88P    Y88b \n");
 
   printf("\n\n-----------------------------------------------\n");
-  printf("Andrés Orozco\nKevin Cardenas \nHector Mejia\n\n");
+  printf("Andrés Orozco\nKevin Cardenas \nHector Mejia\n");
+  printf("Repository: github.com/moonR2/EduAlgorithms \n\n");
   std::cout << "Main Menu" << '\n';
   std::cout << "1) Manually generation Keys" << '\n';
   std::cout << "2) Auto generation Keys" << '\n';
@@ -218,8 +199,8 @@ void menu_art()
 void texttonum()
 {
 
-    mpz_init(charbase);
-    mpz_set_str(charbase,plaintext,62);
-    std::cout << "Charbase: " << charbase <<'\n';
+  mpz_init(charbase);
+  mpz_set_str(charbase,plaintext,62);
+  std::cout << "TexInNumbers: " << charbase <<'\n';
 
 }
